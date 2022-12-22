@@ -61,147 +61,73 @@ namespace _Project.Scripts.Grid
             return true;
         }
 
-        public void ComputeDown()
+        private void Compute(Vector2Int start, Vector2Int size, Vector2Int side)
         {
             bool wasMoved = true;
             while (wasMoved)
             {
                 wasMoved = false;
-                for (int i = 0; i < _sizeX; i++)
+                for (int i = start.x; i < size.x; i++)
                 {
-                    for (int j = 1; j < _sizeY; j++)
+                    for (int j = start.y; j < size.y; j++)
                     {
-                        if (_grid[i, j - 1] != 0 && _grid[i, j] == 0)
+                        if (_grid[i + side.x, j + side.y] != 0 && _grid[i, j] == 0)
                         {
-                            _grid[i, j] = _grid[i, j - 1];
-                            _grid[i, j - 1] = 0;
+                            _grid[i, j] = _grid[i + side.x, j + side.y];
+                            _grid[i + side.x, j + side.y] = 0;
                             wasMoved = true;
                         }
                     }
                 }
             }
 
-            for (int i = 0; i < _sizeX; i++)
+            for (int i = start.x; i < size.x; i++)
             {
-                for (int j = 1; j < _sizeY; j++)
+                for (int j = start.y; j < size.y; j++)
                 {
-                    if (_grid[i, j] == _grid[i, j - 1])
+                    if (_grid[i, j] == 0)
+                        continue;
+                    
+                    if (_grid[i, j] == _grid[i + side.x, j + side.y])
                     {
                         _grid[i, j] *= 2;
-                        _grid[i, j - 1] = 0;
+                        _grid[i + side.x, j + side.y] = 0;
                     }
                 }
             }
+        }
 
+        public void ComputeDown()
+        {
+            Compute(
+                new Vector2Int(0, 1),
+                new Vector2Int(_sizeX, _sizeY),
+                new Vector2Int(0, -1));
         }
 
         public void ComputeUp()
         {
-            bool wasMoved = true;
-            while (wasMoved)
-            {
-                wasMoved = false;
-                for (int i = 0; i < _sizeX; i++)
-                {
-                    for (int j = 0; j < _sizeY - 1; j++)
-                    {
-                        if (_grid[i, j + 1] != 0 && _grid[i, j] == 0)
-                        {
-                            _grid[i, j] = _grid[i, j + 1];
-                            _grid[i, j + 1] = 0;
-                            wasMoved = true;
-                        }
-                    }
-                }
-            }
-
-            for (int i = 0; i < _sizeX; i++)
-            {
-                for (int j = 0; j < _sizeY - 1; j++)
-                {
-                    if (_grid[i, j] == 0)
-                        continue;
-                    if (_grid[i, j] == _grid[i, j + 1])
-                    {
-                        _grid[i, j] *= 2;
-                        _grid[i, j + 1] = 0;
-                    }
-                }
-            }
-
+            Compute(
+                new Vector2Int(0, 0),
+                new Vector2Int(_sizeX, _sizeY - 1),
+                new Vector2Int(0, 1));
         }
 
         public void ComputeRight()
         {
-            bool wasMoved = true;
-            while (wasMoved)
-            {
-                wasMoved = false;
-                for (int i = 1; i < _sizeX; i++)
-                {
-                    for (int j = 0; j < _sizeY; j++)
-                    {
-                        if (_grid[i - 1, j] != 0 && _grid[i, j] == 0)
-                        {
-                            _grid[i, j] = _grid[i - 1, j];
-                            _grid[i - 1, j] = 0;
-                            wasMoved = true;
-                        }
-                    }
-                }
-            }
-
-
-            for (int i = 1; i < _sizeX; i++)
-            {
-                for (int j = 0; j < _sizeY; j++)
-                {
-                    if (_grid[i, j] == _grid[i - 1, j])
-                    {
-                        if (_grid[i, j] == 0)
-                            continue;
-                        _grid[i, j] *= 2;
-                        _grid[i - 1, j] = 0;
-                    }
-                }
-            }
+            Compute(
+                new Vector2Int(1, 0),
+                new Vector2Int(_sizeX, _sizeY),
+                new Vector2Int(-1, 0));
         }
 
         public void ComputeLeft()
         {
-            bool wasMoved = true;
-            while (wasMoved)
-            {
-                wasMoved = false;
-                for (int i = 0; i < _sizeX - 1; i++)
-                {
-                    for (int j = 0; j < _sizeY; j++)
-                    {
-                        if (_grid[i + 1, j] != 0 && _grid[i, j] == 0)
-                        {
-                            _grid[i, j] = _grid[i + 1, j];
-                            _grid[i + 1, j] = 0;
-                            wasMoved = true;
-                        }
-                    }
-                }
-            }
-
-            for (int i = 0; i < _sizeX - 1; i++)
-            {
-                for (int j = 0; j < _sizeY; j++)
-                {
-                    if (_grid[i, j] == _grid[i + 1, j])
-                    {
-                        if (_grid[i, j] == 0)
-                            continue;
-                        _grid[i, j] *= 2;
-                        _grid[i + 1, j] = 0;
-                    }
-                }
-            }
+            Compute(
+                new Vector2Int(0, 0),
+                new Vector2Int(_sizeX - 1, _sizeY),
+                new Vector2Int(1, 0));
         }
-
     }
 
     public class GridResult
