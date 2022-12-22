@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using UnityEngine;
+using Assert = UnityEngine.Assertions.Assert;
 
 namespace _Project.Scripts.Grid.Editor
 {
@@ -12,7 +13,84 @@ namespace _Project.Scripts.Grid.Editor
         {
             _grid = new GameObject().AddComponent<GridController>();
         }
+
+
+        [Test]
+        public void RESULT_CHECK_TOP()
+        {
+            var arr = new int[,]
+            {
+                { 0, 0, 0 },
+                { 0, 0, 0 },
+                { 8, 0, 0 }
+            };
+            
+            arr.Transpose();
+            
+            _grid.InitGrid(arr);
+            var results = _grid.ComputeUp();
+            Assert.AreEqual(results.Count, 1);
+            Assert.AreEqual(results[0].MovedTo, new Vector2Int(0, 0));
+            Assert.AreEqual(results[0].MovedFrom, new Vector2Int(0, 2));
+        }
         
         
+        [Test]
+        public void RESULT_CHECK_DOWN()
+        {
+            var arr = new int[,]
+            {
+                { 0, 8, 0 },
+                { 0, 0, 0 },
+                { 0, 0, 0 }
+            };
+            
+            arr.Transpose();
+            
+            _grid.InitGrid(arr);
+            var results = _grid.ComputeDown();
+            Assert.AreEqual(results.Count, 1);
+            Assert.AreEqual(results[0].MovedFrom, new Vector2Int(1, 0));
+            Assert.AreEqual(results[0].MovedTo, new Vector2Int(1, 2));
+        }
+        
+        [Test]
+        public void RESULT_CHECK_LEFT()
+        {
+            var arr = new int[,]
+            {
+                { 0, 8, 0 },
+                { 0, 0, 0 },
+                { 0, 0, 0 }
+            };
+            
+            arr.Transpose();
+            
+            _grid.InitGrid(arr);
+            var results = _grid.ComputeLeft();
+            Assert.AreEqual(results.Count, 1);
+            Assert.AreEqual(results[0].MovedFrom, new Vector2Int(1, 0));
+            Assert.AreEqual(results[0].MovedTo, new Vector2Int(0, 0));
+        }
+        
+                
+        [Test]
+        public void RESULT_CHECK_RIGHT()
+        {
+            var arr = new int[,]
+            {
+                { 0, 8, 0 },
+                { 0, 0, 0 },
+                { 0, 0, 0 }
+            };
+            
+            arr.Transpose();
+            
+            _grid.InitGrid(arr);
+            var results = _grid.ComputeRight();
+            Assert.AreEqual(results.Count, 1);
+            Assert.AreEqual(results[0].MovedFrom, new Vector2Int(1, 0));
+            Assert.AreEqual(results[0].MovedTo, new Vector2Int(2, 0));
+        }
     }
 }

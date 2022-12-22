@@ -11,6 +11,8 @@ namespace _Project.Scripts.Grid
         private int _sizeX;
         private int _sizeY;
 
+        public int[,] GetRawGrid() => _grid;
+
         public void InitGrid(int sizeX, int sizeY)
         {
             _sizeX = sizeX;
@@ -61,8 +63,10 @@ namespace _Project.Scripts.Grid
             return true;
         }
 
-        private void Compute(Vector2Int start, Vector2Int size, Vector2Int side)
+        private List<GridChange> Compute(Vector2Int start, Vector2Int size, Vector2Int side)
         {
+            var list = new List<GridChange>();
+            
             bool wasMoved = true;
             while (wasMoved)
             {
@@ -73,6 +77,20 @@ namespace _Project.Scripts.Grid
                     {
                         if (_grid[i + side.x, j + side.y] != 0 && _grid[i, j] == 0)
                         {
+                            var obj = list
+                                .Find(_ => (_.MovedTo.x == i + side.x 
+                                            && _.MovedTo.y == j + side.y));
+                            if (obj == null)
+                            {
+                                obj = new GridChange
+                                {
+                                    MovedFrom = new Vector2Int(i + side.x, j + side.y)
+                                };
+                                list.Add(obj);
+                            }
+
+                            obj.MovedTo = new Vector2Int(i, j);
+                            
                             _grid[i, j] = _grid[i + side.x, j + side.y];
                             _grid[i + side.x, j + side.y] = 0;
                             wasMoved = true;
@@ -91,46 +109,62 @@ namespace _Project.Scripts.Grid
                     if (_grid[i, j] == _grid[i + side.x, j + side.y])
                     {
                         _grid[i, j] *= 2;
+                        var obj = list
+                            .Find(_ => _.MovedTo.x == i + side.x
+                                       && _.MovedTo.y == j + side.y);
+                        if (obj == null)
+                        {
+                            obj = new GridChange
+                            {
+                                MovedFrom = new Vector2Int(i, j)
+                            };
+                            list.Add(obj);
+                        }
+
+                        obj.MovedTo = new Vector2Int(i, j);
+                        obj.IsMeshed = true;
                         _grid[i + side.x, j + side.y] = 0;
                     }
                 }
             }
+
+            return list;
         }
 
-        public void ComputeDown()
+        public List<GridChange> ComputeDown()
         {
-            Compute(
+            return Compute(
                 new Vector2Int(0, 1),
                 new Vector2Int(_sizeX, _sizeY),
                 new Vector2Int(0, -1));
         }
 
-        public void ComputeUp()
+        public List<GridChange> ComputeUp()
         {
-            Compute(
+            return Compute(
                 new Vector2Int(0, 0),
                 new Vector2Int(_sizeX, _sizeY - 1),
                 new Vector2Int(0, 1));
         }
 
-        public void ComputeRight()
+        public List<GridChange> ComputeRight()
         {
-            Compute(
+            return Compute(
                 new Vector2Int(1, 0),
                 new Vector2Int(_sizeX, _sizeY),
                 new Vector2Int(-1, 0));
         }
 
-        public void ComputeLeft()
+        public List<GridChange> ComputeLeft()
         {
-            Compute(
+            return Compute(
                 new Vector2Int(0, 0),
                 new Vector2Int(_sizeX - 1, _sizeY),
                 new Vector2Int(1, 0));
         }
     }
 
-    public class GridResult
+    public class GridChange
     {
         public Vector2Int MovedFrom;
         public Vector2Int MovedTo;
