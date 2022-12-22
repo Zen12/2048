@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -68,12 +69,12 @@ namespace _Project.Scripts.Grid
                 wasMoved = false;
                 for (int i = 0; i < _sizeX; i++)
                 {
-                    for (int j = 0; j < _sizeY - 1; j++)
+                    for (int j = 1; j < _sizeY; j++)
                     {
-                        if (_grid[i, j] != 0 && _grid[i, j + 1] == 0)
+                        if (_grid[i, j - 1] != 0 && _grid[i, j] == 0)
                         {
-                            _grid[i, j + 1] = _grid[i, j];
-                            _grid[i, j] = 0;
+                            _grid[i, j] = _grid[i, j - 1];
+                            _grid[i, j - 1] = 0;
                             wasMoved = true;
                         }
                     }
@@ -102,12 +103,12 @@ namespace _Project.Scripts.Grid
                 wasMoved = false;
                 for (int i = 0; i < _sizeX; i++)
                 {
-                    for (int j = 1; j < _sizeY; j++)
+                    for (int j = 0; j < _sizeY - 1; j++)
                     {
-                        if (_grid[i, j] != 0 && _grid[i, j - 1] == 0)
+                        if (_grid[i, j + 1] != 0 && _grid[i, j] == 0)
                         {
-                            _grid[i, j - 1] = _grid[i, j];
-                            _grid[i, j] = 0;
+                            _grid[i, j] = _grid[i, j + 1];
+                            _grid[i, j + 1] = 0;
                             wasMoved = true;
                         }
                     }
@@ -136,16 +137,14 @@ namespace _Project.Scripts.Grid
             while (wasMoved)
             {
                 wasMoved = false;
-                for (int i = 0; i < _sizeX - 1; i++)
+                for (int i = 1; i < _sizeX; i++)
                 {
                     for (int j = 0; j < _sizeY; j++)
                     {
-                        if (_grid[i, j] == 0)
-                            continue;
-                        if (_grid[i, j] != 0 && _grid[i + 1, j] == 0)
+                        if (_grid[i - 1, j] != 0 && _grid[i, j] == 0)
                         {
-                            _grid[i + 1, j] = _grid[i, j];
-                            _grid[i, j] = 0;
+                            _grid[i, j] = _grid[i - 1, j];
+                            _grid[i - 1, j] = 0;
                             wasMoved = true;
                         }
                     }
@@ -174,14 +173,14 @@ namespace _Project.Scripts.Grid
             while (wasMoved)
             {
                 wasMoved = false;
-                for (int i = 1; i < _sizeX; i++)
+                for (int i = 0; i < _sizeX - 1; i++)
                 {
                     for (int j = 0; j < _sizeY; j++)
                     {
-                        if (_grid[i, j] != 0 && _grid[i - 1, j] == 0)
+                        if (_grid[i + 1, j] != 0 && _grid[i, j] == 0)
                         {
-                            _grid[i - 1, j] = _grid[i, j];
-                            _grid[i, j] = 0;
+                            _grid[i, j] = _grid[i + 1, j];
+                            _grid[i + 1, j] = 0;
                             wasMoved = true;
                         }
                     }
@@ -203,5 +202,14 @@ namespace _Project.Scripts.Grid
             }
         }
 
+    }
+
+    public class GridResult
+    {
+        public Vector2Int MovedFrom;
+        public Vector2Int MovedTo;
+        public int StartValue;
+        public int FinalValue;
+        public bool IsMeshed;
     }
 }
