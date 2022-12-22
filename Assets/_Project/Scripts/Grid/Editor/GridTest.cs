@@ -15,6 +15,14 @@ namespace _Project.Scripts.Grid.Editor
         
         
         [Test]
+        public void GRID_INIT_1_PIECES_HECK_FOR_VALID_PIECE()
+        {
+            _grid.InitGrid(3, 3);
+            var p = _grid.AddPieceToRandomPlace();
+            Assert.IsTrue(p.IsCreated);
+        }
+        
+        [Test]
         public void GRID_INIT_2_PIECES_HECK_FOR_VALID_GRID()
         {
             _grid.InitGrid(3, 3);

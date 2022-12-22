@@ -32,7 +32,7 @@ namespace _Project.Scripts.Grid
             return _grid[x, y];
         }
 
-        public void AddPieceToRandomPlace()
+        public GridChange AddPieceToRandomPlace()
         {
             if (IsFull())
                 throw new Exception("Not able to add new piece because grid is full");
@@ -44,7 +44,11 @@ namespace _Project.Scripts.Grid
                 if (_grid[rX, rY] == 0)
                 {
                     _grid[rX, rY] = 2;
-                    return;
+                    return new GridChange
+                    {
+                        MovedTo = new Vector2Int(rX, rY),
+                        IsCreated = true
+                    };
                 }
             }
         }
@@ -67,6 +71,15 @@ namespace _Project.Scripts.Grid
         {
             var list = new List<GridChange>();
             
+            ComputeMoving(start, size, side, list);
+            ComputeCombine(start, size, side, list);
+            ComputeMoving(start, size, side, list);
+
+            return list;
+        }
+
+        private void ComputeMoving(Vector2Int start, Vector2Int size, Vector2Int side, List<GridChange> list)
+        {
             bool wasMoved = true;
             while (wasMoved)
             {
@@ -98,7 +111,10 @@ namespace _Project.Scripts.Grid
                     }
                 }
             }
+        }
 
+        public void ComputeCombine(Vector2Int start, Vector2Int size, Vector2Int side, List<GridChange> list)
+        {
             for (int i = start.x; i < size.x; i++)
             {
                 for (int j = start.y; j < size.y; j++)
@@ -127,8 +143,6 @@ namespace _Project.Scripts.Grid
                     }
                 }
             }
-
-            return list;
         }
 
         public List<GridChange> ComputeDown()
@@ -168,8 +182,8 @@ namespace _Project.Scripts.Grid
     {
         public Vector2Int MovedFrom;
         public Vector2Int MovedTo;
-        public int StartValue;
-        public int FinalValue;
+        public int Value;
+        public bool IsCreated;
         public bool IsMeshed;
     }
 }
