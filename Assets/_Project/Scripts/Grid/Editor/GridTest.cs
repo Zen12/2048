@@ -235,5 +235,83 @@ namespace _Project.Scripts.Grid.Editor
             Assert.AreEqual(4, _grid.GetElement(2, 0));
             Assert.AreEqual(4, _grid.GetElement(3, 0));
         }
+        
+        [Test]
+        public void GRID_SQUASH_PRIORITY_RIGHT()
+        {
+            var arr = new int[,]
+            {
+                { 0, 2, 2, 2 },
+                { 0, 0, 0, 0 },
+                { 0, 0, 0, 0 },
+                { 0, 0, 0, 0 },
+            };
+            
+            arr.Transpose();
+            
+            _grid.InitGrid(arr);
+            _grid.ComputeRight();
+            
+            Assert.AreEqual(4, _grid.GetElement(3, 0));
+        }
+        
+        [Test]
+        public void GRID_SQUASH_PRIORITY_LEFT()
+        {
+            var arr = new int[,]
+            {
+                { 0, 2, 2, 2 },
+                { 0, 0, 0, 0 },
+                { 0, 0, 0, 0 },
+                { 0, 0, 0, 0 },
+            };
+            
+            arr.Transpose();
+            
+            _grid.InitGrid(arr);
+            _grid.ComputeLeft();
+            
+            Assert.AreEqual(4, _grid.GetElement(0, 0));
+        }
+        
+                
+        [Test]
+        public void GRID_SQUASH_PRIORITY_Up()
+        {
+            var arr = new int[,]
+            {
+                { 0, 2, 0, 0 },
+                { 0, 2, 0, 0 },
+                { 0, 2, 0, 0 },
+                { 0, 0, 0, 0 },
+            };
+            
+            arr.Transpose();
+            
+            _grid.InitGrid(arr);
+            _grid.ComputeUp();
+            
+            Assert.AreEqual(4, _grid.GetElement(1, 0));
+        }
+        
+                        
+        [Test]
+        public void GRID_SQUASH_PRIORITY_Down()
+        {
+            var arr = new int[,]
+            {
+                { 0, 2, 0, 0 },
+                { 0, 2, 0, 0 },
+                { 0, 2, 0, 0 },
+                { 0, 0, 0, 0 },
+            };
+            
+            arr.Transpose();
+            
+            _grid.InitGrid(arr);
+            _grid.ComputeDown();
+            
+            Assert.AreEqual(4, _grid.GetElement(1, 3));
+        }
     }
 }
