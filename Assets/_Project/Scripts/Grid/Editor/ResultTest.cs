@@ -36,7 +36,7 @@ namespace _Project.Scripts.Grid.Editor
         
         
         [Test]
-        public void RESULT_CHECK_DOWN()
+        public void RESULT_CHECK_MOVE_DOWN_ONE_PIECE()
         {
             var arr = new int[,]
             {
@@ -52,6 +52,47 @@ namespace _Project.Scripts.Grid.Editor
             Assert.AreEqual(results.Count, 1);
             Assert.AreEqual(results[0].MovedFrom, new Vector2Int(1, 0));
             Assert.AreEqual(results[0].MovedTo, new Vector2Int(1, 2));
+        }
+        
+                
+        [Test]
+        public void RESULT_CHECK_MOVE_DOWN_2_PIECE()
+        {
+            var arr = new int[,]
+            {
+                { 0, 8, 6 },
+                { 0, 0, 0 },
+                { 0, 0, 0 }
+            };
+            
+            arr.Transpose();
+            
+            _grid.InitGrid(arr);
+            var results = _grid.ComputeDown();
+            Assert.AreEqual(results.Count, 2);
+            Assert.AreEqual(results[0].MovedFrom, new Vector2Int(1, 0));
+            Assert.AreEqual(results[0].MovedTo, new Vector2Int(1, 2));
+            
+            Assert.AreEqual(results[1].MovedFrom, new Vector2Int(2, 0));
+            Assert.AreEqual(results[1].MovedTo, new Vector2Int(2, 2));
+        }
+        
+        [Test]
+        public void RESULT_CHECK_MOVE_UP_2_PIECE()
+        {
+            var arr = new int[,]
+            {
+                { 0, 0, 0, 0 },
+                { 0, 0, 0, 0 },
+                { 0, 0, 0, 0 },
+                { 0, 8, 6, 0 },
+            };
+            
+            arr.Transpose();
+            
+            _grid.InitGrid(arr);
+            var results = _grid.ComputeUp();
+            Assert.AreEqual(results.Count, 2);
         }
         
         [Test]

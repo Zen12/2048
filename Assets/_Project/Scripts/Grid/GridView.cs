@@ -38,10 +38,10 @@ namespace _Project.Scripts.Grid
             {
                 case InputState.None:
                     break;
-                case InputState.Up:
+                case InputState.Down:
                     ApplyGridChanges(_grid.ComputeUp());
                     break;
-                case InputState.Down:
+                case InputState.Up:
                     ApplyGridChanges(_grid.ComputeDown());
                     break;
                 case InputState.Left:
@@ -54,7 +54,6 @@ namespace _Project.Scripts.Grid
                     throw new ArgumentOutOfRangeException(nameof(state), state, null);
             }
             
-            ApplyGridChange(_grid.AddPieceToRandomPlace());
         }
 
         public void ApplyGridChanges(List<GridChange> changes)
