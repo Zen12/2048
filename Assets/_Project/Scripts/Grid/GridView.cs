@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using _Project.Scripts.Adapters;
 using _Project.Scripts.Pools;
 using _Project.Scripts.View;
 using MonoDI.Scripts.Core;
@@ -28,6 +30,41 @@ namespace _Project.Scripts.Grid
             ApplyGridChange(_grid.AddPieceToRandomPlace());
             ApplyGridChange(_grid.AddPieceToRandomPlace());
         }
+        
+        [Sub]
+        private void OnInputUpdate(InputSignal state)
+        {
+            switch (state.State)
+            {
+                case InputState.None:
+                    break;
+                case InputState.Up:
+                    ApplyGridChanges(_grid.ComputeUp());
+                    break;
+                case InputState.Down:
+                    ApplyGridChanges(_grid.ComputeDown());
+                    break;
+                case InputState.Left:
+                    ApplyGridChanges(_grid.ComputeLeft());
+                    break;
+                case InputState.Right:
+                    ApplyGridChanges(_grid.ComputeRight());
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(state), state, null);
+            }
+            
+            ApplyGridChange(_grid.AddPieceToRandomPlace());
+        }
+
+        public void ApplyGridChanges(List<GridChange> changes)
+        {
+            foreach (var gridChange in changes)
+            {
+                ApplyGridChange(gridChange);
+            }
+        }
+
 
         public void ApplyGridChange(GridChange change)
         {
