@@ -47,7 +47,8 @@ namespace _Project.Scripts.Grid
                     return new GridChange
                     {
                         MovedTo = new Vector2Int(rX, rY),
-                        IsCreated = true
+                        IsCreated = true,
+                        Value = 2
                     };
                 }
             }

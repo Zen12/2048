@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8eb7ea09e730040d59793c8819e2a3d7, type: 3}
+  m_Name: SpriteConfig
+  m_EditorClassIdentifier: 
+  _prefab: {fileID: 292680278306648828, guid: fb121a359ca4e43c687b3639ebd87813, type: 3}
+  _data:
+  - Value: 2
+    Image: {fileID: 1807125615787039003, guid: 7205042baa52a406d904d86e5d2465bc, type: 3}
+  - Value: 4
+    Image: {fileID: 349823833441268365, guid: 7205042baa52a406d904d86e5d2465bc, type: 3}
+  - Value: 8
+    Image: {fileID: -6614373457484812694, guid: 7205042baa52a406d904d86e5d2465bc, type: 3}
+  - Value: 16
+    Image: {fileID: 1639214462598301798, guid: 7205042baa52a406d904d86e5d2465bc, type: 3}
+  - Value: 32
+    Image: {fileID: 2157240733274199957, guid: 7205042baa52a406d904d86e5d2465bc, type: 3}
+  - Value: 64
+    Image: {fileID: 4798128000316562087, guid: 7205042baa52a406d904d86e5d2465bc, type: 3}
+  - Value: 128
+    Image: {fileID: -7995846982363831464, guid: 7205042baa52a406d904d86e5d2465bc, type: 3}
+  - Value: 256
+    Image: {fileID: -4202638810691693305, guid: 7205042baa52a406d904d86e5d2465bc, type: 3}
+  - Value: 512
+    Image: {fileID: -7708644975649761358, guid: 7205042baa52a406d904d86e5d2465bc, type: 3}
+  - Value: 1024
+    Image: {fileID: -1530080802165054831, guid: 7205042baa52a406d904d86e5d2465bc, type: 3}
+  - Value: 2048
+    Image: {fileID: 5560954434011818755, guid: 7205042baa52a406d904d86e5d2465bc, type: 3}
+  - Value: 4096
+    Image: {fileID: 4239528737361974724, guid: 7205042baa52a406d904d86e5d2465bc, type: 3}
