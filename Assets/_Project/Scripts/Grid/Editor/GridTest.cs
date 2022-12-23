@@ -194,5 +194,25 @@ namespace _Project.Scripts.Grid.Editor
             Assert.AreEqual(4, _grid.GetElement(0, 1));
             Assert.AreEqual(6, _grid.GetElement(0, 2));
         }
+        
+        [Test]
+        public void GRID_SQUASH_ONLY_ONCE()
+        {
+            var arr = new int[,]
+            {
+                { 2, 2, 4, 0 },
+                { 0, 0, 0, 0 },
+                { 0, 0, 0, 0 },
+                { 0, 0, 0, 0 },
+            };
+            
+            arr.Transpose();
+            
+            _grid.InitGrid(arr);
+            _grid.ComputeRight();
+            
+            Assert.AreEqual(4, _grid.GetElement(2, 0));
+            Assert.AreEqual(4, _grid.GetElement(3, 0));
+        }
     }
 }

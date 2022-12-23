@@ -122,9 +122,19 @@ namespace _Project.Scripts.Grid
                 {
                     if (_grid[i, j] == 0)
                         continue;
+
                     
                     if (_grid[i, j] == _grid[i + side.x, j + side.y])
                     {
+                        if (list.Exists(_ =>
+                                _.IsCreated == true &&
+                                ((_.MovedTo.x == i && _.MovedTo.y == j) || 
+                                 (_.MovedTo.x == i + side.x && _.MovedTo.y == j + side.y))
+                            ))
+                        {
+                            continue;
+                        }
+                        
                         list.Add(new GridChange
                         {
                             IsDestroy = true,
