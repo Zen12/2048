@@ -196,6 +196,27 @@ namespace _Project.Scripts.Grid.Editor
         }
         
         [Test]
+        public void GRID_SQUASH_AND_MOVE_PIECES()
+        {
+            var arr = new int[,]
+            {
+                { 0, 0, 0, 0 },
+                { 2, 0, 0, 0 },
+                { 0, 0, 0, 8 },
+                { 2, 4, 4, 16 }
+            };
+            
+            arr.Transpose();
+            
+            _grid.InitGrid(arr);
+            var changes = _grid.ComputeRight();
+            
+            Assert.AreEqual(16, _grid.GetElement(3, 3));
+            Assert.AreEqual(8, _grid.GetElement(2, 3));
+            Assert.AreEqual(2, _grid.GetElement(1, 3));
+        }
+        
+        [Test]
         public void GRID_SQUASH_ONLY_ONCE()
         {
             var arr = new int[,]
