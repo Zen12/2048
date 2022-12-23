@@ -133,5 +133,23 @@ namespace _Project.Scripts.Grid.Editor
             Assert.AreEqual(results[0].MovedFrom, new Vector2Int(1, 0));
             Assert.AreEqual(results[0].MovedTo, new Vector2Int(2, 0));
         }
+        
+        [Test]
+        public void RESULT_CHECK_CORRECT_AMOUNT_OF_CHANGES()
+        {
+            var arr = new int[,]
+            {
+                { 2, 4, 4, 16 },
+                { 0, 0, 0, 8 },
+                { 0, 0, 0, 0 },
+                { 0, 0, 0, 0 },
+            };
+            
+            _grid.InitGrid(arr);
+            var changes = _grid.ComputeRight();
+            Assert.AreEqual(5, changes.Count);
+            
+            
+        }
     }
 }

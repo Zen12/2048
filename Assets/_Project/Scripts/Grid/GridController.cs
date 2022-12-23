@@ -32,6 +32,17 @@ namespace _Project.Scripts.Grid
             return _grid[x, y];
         }
 
+        public GridChange AddPieceAt(int x, int y, int value)
+        {
+            _grid[x, y] = value;
+            return new GridChange
+            {
+                MovedTo = new Vector2Int(x, y),
+                IsCreated = true,
+                Value = value
+            };
+        }
+
         public GridChange AddPieceToRandomPlace()
         {
             if (IsFull())
@@ -92,13 +103,16 @@ namespace _Project.Scripts.Grid
                         if (_grid[i + side.x, j + side.y] != 0 && _grid[i, j] == 0)
                         {
                             var obj = list
-                                .Find(_ => (_.MovedTo.x == i + side.x 
-                                            && _.MovedTo.y == j + side.y));
+                                .Find(
+                                    _ => _.MovedTo.x == i + side.x && 
+                                          _.MovedTo.y == j + side.y &&
+                                          _.IsDestroy == false);
+                            
                             if (obj == null)
                             {
                                 obj = new GridChange
                                 {
-                                    MovedFrom = new Vector2Int(i + side.x, j + side.y)
+                                    MovedFrom = new Vector2Int(i + side.x , j+ side.y )
                                 };
                                 list.Add(obj);
                             }
