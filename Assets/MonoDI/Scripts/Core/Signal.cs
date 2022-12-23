@@ -86,14 +86,7 @@ namespace MonoDI.Scripts.Core
                         return;
                 }
                 
-                try
-                {
-                    _info.Invoke(_obj, new[] {data});
-                }
-                catch (System.Exception e)
-                {
-                    UnityEngine.Debug.LogError(e.StackTrace);
-                }
+                _info.Invoke(_obj, new[] {data});
             }
         }
 

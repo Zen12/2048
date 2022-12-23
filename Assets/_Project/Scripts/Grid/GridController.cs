@@ -125,22 +125,27 @@ namespace _Project.Scripts.Grid
                     
                     if (_grid[i, j] == _grid[i + side.x, j + side.y])
                     {
-                        _grid[i, j] *= 2;
-                        var obj = list
-                            .Find(_ => _.MovedTo.x == i + side.x
-                                       && _.MovedTo.y == j + side.y);
-                        if (obj == null)
+                        list.Add(new GridChange
                         {
-                            obj = new GridChange
-                            {
-                                MovedFrom = new Vector2Int(i, j)
-                            };
-                            list.Add(obj);
-                        }
+                            IsDestroy = true,
+                            MovedFrom = new Vector2Int(i + side.x, j + side.y)
+                        });
+                        
+                        list.Add(new GridChange
+                        {
+                            IsDestroy = true,
+                            MovedFrom = new Vector2Int(i, j)
+                        });
 
-                        obj.MovedTo = new Vector2Int(i, j);
-                        obj.IsMeshed = true;
+                        _grid[i, j] *= 2;
                         _grid[i + side.x, j + side.y] = 0;
+                        
+                        list.Add(new GridChange
+                        {
+                            IsCreated = true,
+                            Value = _grid[i, j],
+                            MovedTo = new Vector2Int(i, j)
+                        });
                     }
                 }
             }
@@ -185,6 +190,6 @@ namespace _Project.Scripts.Grid
         public Vector2Int MovedTo;
         public int Value;
         public bool IsCreated;
-        public bool IsMeshed;
+        public bool IsDestroy;
     }
 }

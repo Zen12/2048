@@ -62,6 +62,11 @@ namespace _Project.Scripts.Grid
             {
                 ApplyGridChange(gridChange);
             }
+
+            if (changes.Count > 0)
+            {
+                ApplyGridChange(_grid.AddPieceToRandomPlace());
+            }
         }
 
 
@@ -73,9 +78,10 @@ namespace _Project.Scripts.Grid
                 _currentActive.Add(o);
                 o.UpdatePosition(GridToWorld(change.MovedTo), change.MovedTo);
             }
-            else if (change.IsMeshed)
+            else if (change.IsDestroy)
             {
                 var o = FindByGridPos(change.MovedFrom);
+                _currentActive.Remove(o);
                 _pool.SetInPool(o);
             }
             else

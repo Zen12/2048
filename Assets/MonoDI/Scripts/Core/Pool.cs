@@ -22,6 +22,8 @@ namespace MonoDI.Scripts.Core
 
         public static void SetInPool(T obj)
         { 
+            if (obj == null)
+                return;
             obj.OnEnterPool();
             if (_pool.Contains(obj) == false)
                 _pool.Add(obj);
