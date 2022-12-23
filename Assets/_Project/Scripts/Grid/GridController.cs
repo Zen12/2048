@@ -96,9 +96,9 @@ namespace _Project.Scripts.Grid
             while (wasMoved)
             {
                 wasMoved = false;
-                for (int i = start.x; i < size.x; i++)
+                for (int i = start.x; i < size.x && i >= 0; i++)
                 {
-                    for (int j = start.y; j < size.y; j++)
+                    for (int j = start.y; j < size.y && j >= 0; j++)
                     {
                         if (_grid[i + side.x, j + side.y] != 0 && _grid[i, j] == 0)
                         {
