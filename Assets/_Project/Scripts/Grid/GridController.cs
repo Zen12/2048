@@ -130,7 +130,7 @@ namespace _Project.Scripts.Grid
             }
         }
 
-        public void ComputeCombine(Vector2Int start, Vector2Int end, Vector2Int direction,
+        private void ComputeCombine(Vector2Int start, Vector2Int end, Vector2Int direction,
             Vector2Int step, List<GridChange> list)
         {
             for (int i = start.x + step.x; i != end.x; i += direction.x)
