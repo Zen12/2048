@@ -173,7 +173,7 @@ namespace _Project.Scripts.Grid
         {
             return Compute(
                 new Vector2Int(0, _sizeY - 1),
-                new Vector2Int(_sizeX, 0),
+                new Vector2Int(_sizeX, -1),
                 new Vector2Int(1, -1),
                 new Vector2Int(0, -1));
         }
@@ -191,7 +191,7 @@ namespace _Project.Scripts.Grid
         {
             return Compute(
                 new Vector2Int(_sizeX - 1, 0),
-                new Vector2Int(0, _sizeY),
+                new Vector2Int(-1, _sizeY),
                 new Vector2Int(-1, 1),
                 new Vector2Int(-1, 0));
         }
