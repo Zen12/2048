@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace _Project.Scripts.Grid
 {
-    public class GridView : InjectedMono
+    public class GameplayController : InjectedMono
     {
         [In] private GridController _grid;
         [In] private SpriteViewPool _pool;
