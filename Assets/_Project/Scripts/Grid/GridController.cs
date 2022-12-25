@@ -79,48 +79,50 @@ namespace _Project.Scripts.Grid
             return true;
         }
 
-        private List<GridChange> Compute(Vector2Int start, Vector2Int size, Vector2Int side)
+        private List<GridChange> Compute(Vector2Int start, Vector2Int end, Vector2Int direction, Vector2Int step)
         {
             var list = new List<GridChange>();
             
-            ComputeMoving(start, size, side, list);
-            ComputeCombine(start, size, side, list);
-            ComputeMoving(start, size, side, list);
+            ComputeMoving(start, end, direction, step, list);
+            ComputeCombine(start, end, direction, step, list);
+            ComputeMoving(start, end, direction, step, list);
 
             return list;
         }
 
-        private void ComputeMoving(Vector2Int start, Vector2Int size, Vector2Int side, List<GridChange> list)
+        private void ComputeMoving(Vector2Int start, Vector2Int end, Vector2Int direction, Vector2Int step,
+            List<GridChange> list)
         {
             bool wasMoved = true;
             while (wasMoved)
             {
                 wasMoved = false;
-                for (int i = start.x; i < size.x && i >= 0; i++)
+                for (int i = start.x + step.x; i != end.x; i += direction.x)
                 {
-                    for (int j = start.y; j < size.y && j >= 0; j++)
+                    for (int j = start.y + step.y; j != end.y; j += direction.y)
                     {
-                        if (_grid[i + side.x, j + side.y] != 0 && _grid[i, j] == 0)
+                        if (_grid[i - step.x, j - step.y] == 0 && _grid[i, j] != 0)
                         {
+                            // to avoid duplication of move of object but to different position
                             var obj = list
                                 .Find(
-                                    _ => _.MovedTo.x == i + side.x && 
-                                          _.MovedTo.y == j + side.y &&
+                                    _ => _.MovedTo.x == i && 
+                                          _.MovedTo.y == j &&
                                           _.IsDestroy == false);
                             
                             if (obj == null)
                             {
                                 obj = new GridChange
                                 {
-                                    MovedFrom = new Vector2Int(i + side.x , j+ side.y )
+                                    MovedFrom = new Vector2Int(i , j)
                                 };
                                 list.Add(obj);
                             }
 
-                            obj.MovedTo = new Vector2Int(i, j);
+                            obj.MovedTo = new Vector2Int(i - step.x, j - step.y);
                             
-                            _grid[i, j] = _grid[i + side.x, j + side.y];
-                            _grid[i + side.x, j + side.y] = 0;
+                            _grid[i - step.x, j - step.y] = _grid[i, j];
+                            _grid[i, j] = 0;
                             wasMoved = true;
                         }
                     }
@@ -128,47 +130,39 @@ namespace _Project.Scripts.Grid
             }
         }
 
-        public void ComputeCombine(Vector2Int start, Vector2Int size, Vector2Int side, List<GridChange> list)
+        public void ComputeCombine(Vector2Int start, Vector2Int end, Vector2Int direction,
+            Vector2Int step, List<GridChange> list)
         {
-            for (int i = start.x; i < size.x; i++)
+            for (int i = start.x + step.x; i != end.x; i += direction.x)
             {
-                for (int j = start.y; j < size.y; j++)
+                for (int j = start.y + step.y; j != end.y; j += direction.y)
                 {
-                    if (_grid[i, j] == 0)
+                    if (_grid[i - step.x, j - step.y] == 0)
                         continue;
 
-                    
-                    if (_grid[i, j] == _grid[i + side.x, j + side.y])
-                    {
-                        if (list.Exists(_ =>
-                                _.IsCreated == true &&
-                                ((_.MovedTo.x == i && _.MovedTo.y == j) || 
-                                 (_.MovedTo.x == i + side.x && _.MovedTo.y == j + side.y))
-                            ))
-                        {
-                            continue;
-                        }
-                        
-                        list.Add(new GridChange
-                        {
-                            IsDestroy = true,
-                            MovedFrom = new Vector2Int(i + side.x, j + side.y)
-                        });
-                        
-                        list.Add(new GridChange
-                        {
-                            IsDestroy = true,
-                            MovedFrom = new Vector2Int(i, j)
-                        });
 
-                        _grid[i, j] *= 2;
-                        _grid[i + side.x, j + side.y] = 0;
+                    if (_grid[i, j] == _grid[i - step.x, j - step.y])
+                    {
+                        _grid[i, j] = 0;
+                        _grid[i - step.x, j - step.y] *= 2;
+                        
+                        list.Add(new GridChange
+                        {
+                            IsDestroy = true,
+                            MovedFrom = new Vector2Int(i - step.x , j - step.y)
+                        });
+                        
+                        list.Add(new GridChange
+                        {
+                            IsDestroy = true,
+                            MovedFrom = new Vector2Int(i , j)
+                        });
                         
                         list.Add(new GridChange
                         {
                             IsCreated = true,
-                            Value = _grid[i, j],
-                            MovedTo = new Vector2Int(i, j)
+                            MovedTo = new Vector2Int(i - step.x, j - step.y),
+                            Value = _grid[i - step.x, j - step.y]
                         });
                     }
                 }
@@ -178,8 +172,9 @@ namespace _Project.Scripts.Grid
         public List<GridChange> ComputeDown()
         {
             return Compute(
-                new Vector2Int(0, 1),
-                new Vector2Int(_sizeX, _sizeY),
+                new Vector2Int(0, _sizeY - 1),
+                new Vector2Int(_sizeX, 0),
+                new Vector2Int(1, -1),
                 new Vector2Int(0, -1));
         }
 
@@ -187,15 +182,17 @@ namespace _Project.Scripts.Grid
         {
             return Compute(
                 new Vector2Int(0, 0),
-                new Vector2Int(_sizeX, _sizeY - 1),
+                new Vector2Int(_sizeX, _sizeY),
+                new Vector2Int(1, 1),
                 new Vector2Int(0, 1));
         }
 
         public List<GridChange> ComputeRight()
         {
             return Compute(
-                new Vector2Int(1, 0),
-                new Vector2Int(_sizeX, _sizeY),
+                new Vector2Int(_sizeX - 1, 0),
+                new Vector2Int(0, _sizeY),
+                new Vector2Int(-1, 1),
                 new Vector2Int(-1, 0));
         }
 
@@ -203,7 +200,8 @@ namespace _Project.Scripts.Grid
         {
             return Compute(
                 new Vector2Int(0, 0),
-                new Vector2Int(_sizeX - 1, _sizeY),
+                new Vector2Int(_sizeX, _sizeY),
+                new Vector2Int(1, 1),
                 new Vector2Int(1, 0));
         }
     }
