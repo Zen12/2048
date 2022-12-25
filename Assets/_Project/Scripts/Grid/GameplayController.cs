@@ -14,6 +14,8 @@ namespace _Project.Scripts.Grid
         [In] private GridController _grid;
         [In] private SpriteViewPool _pool;
 
+        [Get] private AnimationQueue _queue;
+
         [SerializeField] private Vector2Int _gridSize;
         [SerializeField] private float _cellSize = 4;
 
@@ -27,8 +29,18 @@ namespace _Project.Scripts.Grid
         public override IEnumerator OnSyncLastCallRoutine()
         {
             yield return null;
-            ApplyGridChange(_grid.AddPieceToRandomPlace());
-            ApplyGridChange(_grid.AddPieceToRandomPlace());
+            {
+                var change = _grid.AddPieceToRandomPlace();
+                var o = _pool.GetFromPool(change.Value);
+                _currentActive.Add(o);
+                o.Animate(GridToWorld(change.MovedTo), change.MovedTo, SpriteView.AnimationType.Create);
+            }
+            {
+                var change = _grid.AddPieceToRandomPlace();
+                var o = _pool.GetFromPool(change.Value);
+                _currentActive.Add(o);
+                o.Animate(GridToWorld(change.MovedTo), change.MovedTo, SpriteView.AnimationType.Create);
+            }
         }
         
         [Sub]
@@ -56,40 +68,47 @@ namespace _Project.Scripts.Grid
             
         }
 
-        public void ApplyGridChanges(List<GridChange> changes)
+        private void ApplyGridChanges(List<GridChange> changes)
         {
-            foreach (var gridChange in changes)
-            {
-                ApplyGridChange(gridChange);
-            }
+            if (changes.Count == 0)
+                return;
 
-            if (changes.Count > 0)
+            _queue.ResetItems();
+            foreach (var change in changes)
             {
-                ApplyGridChange(_grid.AddPieceToRandomPlace());
+                if (change.IsCreated)
+                {
+                    var o = _pool.GetFromPool(change.Value);
+                    _currentActive.Add(o);
+                    _queue.AddItem(o, change, GridToWorld(change.MovedTo));
+                } else
+                {
+                    var o = FindByGridPos(change.MovedFrom);
+                    _queue.AddItem(o, change, GridToWorld(change.MovedTo));
+                }
             }
+            
+            _queue.Execute(() =>
+            {
+                foreach (var change in changes)
+                {
+                    if (change.IsDestroy)
+                    {
+                        var o = FindByGridPos(change.MovedFrom);
+                        _currentActive.Remove(o);
+                        _pool.SetInPool(o);
+                    }
+                }
+                
+                {
+                    var change = _grid.AddPieceToRandomPlace();
+                    var o = _pool.GetFromPool(change.Value);
+                    _currentActive.Add(o);
+                    o.Animate(GridToWorld(change.MovedTo), change.MovedTo, SpriteView.AnimationType.Create);
+                }
+            });
         }
 
-
-        public void ApplyGridChange(GridChange change)
-        {
-            if (change.IsCreated)
-            {
-                var o = _pool.GetFromPool(change.Value);
-                _currentActive.Add(o);
-                o.Animate(GridToWorld(change.MovedTo), change.MovedTo, SpriteView.AnimationType.Create);
-            }
-            else if (change.IsDestroy)
-            {
-                var o = FindByGridPos(change.MovedFrom);
-                _currentActive.Remove(o);
-                _pool.SetInPool(o);
-            }
-            else
-            {
-                var o = FindByGridPos(change.MovedFrom);
-                o.Animate(GridToWorld(change.MovedTo), change.MovedTo, SpriteView.AnimationType.Move);
-            }
-        }
 
         private SpriteView FindByGridPos(Vector2Int gridPos)
         {

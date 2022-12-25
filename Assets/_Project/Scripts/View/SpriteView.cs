@@ -55,6 +55,7 @@ namespace _Project.Scripts.View
         
         public void OnEnterPool()
         {
+            _tr.position = Vector3.left * 1000000f;
             gameObject.SetActive(false);
         }
 
