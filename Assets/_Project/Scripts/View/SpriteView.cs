@@ -22,12 +22,6 @@ namespace _Project.Scripts.View
 
         private float _speed = 12f;
 
-        public void UpdateOnFinish(System.Action onFinish)
-        {
-            _onFinishMove = onFinish;
-        }
-
-
         public void Animate(Vector3 pos, Vector2Int gridPos, AnimationType animationType,
             System.Action onFinish = null)
         {
@@ -61,10 +55,12 @@ namespace _Project.Scripts.View
         
         public void OnEnterPool()
         {
+            gameObject.SetActive(false);
         }
 
         public void OnExitPool()
         {
+            gameObject.SetActive(true);
         }
         
         #region Animation

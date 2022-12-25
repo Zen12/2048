@@ -76,7 +76,7 @@ namespace _Project.Scripts.Grid
             {
                 var o = _pool.GetFromPool(change.Value);
                 _currentActive.Add(o);
-                o.UpdatePosition(GridToWorld(change.MovedTo), change.MovedTo);
+                o.Animate(GridToWorld(change.MovedTo), change.MovedTo, SpriteView.AnimationType.Create);
             }
             else if (change.IsDestroy)
             {
@@ -87,7 +87,7 @@ namespace _Project.Scripts.Grid
             else
             {
                 var o = FindByGridPos(change.MovedFrom);
-                o.UpdatePosition(GridToWorld(change.MovedTo), change.MovedTo);
+                o.Animate(GridToWorld(change.MovedTo), change.MovedTo, SpriteView.AnimationType.Move);
             }
         }
 
