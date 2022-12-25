@@ -13,6 +13,7 @@ namespace _Project.Scripts.Pools
         {
             var view = Pool<SpriteView>.GetFromPool(CreateNewView);
             view.UpdateSprite(_spriteConfig.GetSpriteByValue(value));
+            view.Value = value;
             return view;
         }
         

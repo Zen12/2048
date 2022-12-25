@@ -13,21 +13,21 @@ namespace _Project.Scripts.View
         private Vector3 _targetPos;
         private Coroutine _lastRoutine;
         private System.Action _onFinishMove;
-
-        public Vector2Int GridPos
+        
+        public int Value
         {
             get;
-            private set;
+            set;
         }
+        
 
         private float _speed = 12f;
 
-        public void Animate(Vector3 pos, Vector2Int gridPos, AnimationType animationType,
+        public void Animate(Vector3 pos, AnimationType animationType,
             System.Action onFinish = null)
         {
             gameObject.SetActive(true);
             _onFinishMove = onFinish;
-            GridPos = gridPos;
             if (_lastRoutine != null)
                 StopCoroutine(_lastRoutine);
 
