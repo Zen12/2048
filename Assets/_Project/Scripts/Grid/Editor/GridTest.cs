@@ -313,5 +313,35 @@ namespace _Project.Scripts.Grid.Editor
             
             Assert.AreEqual(4, _grid.GetElement(1, 3));
         }
+        
+        [Test]
+        public void GRID_IS_ABLE_TO_MAKE_MOVE_ON_IMPOSSIBLE_BOARD()
+        {
+            var arr = new int[,]
+            {
+                { 1, 2, 3, 4 },
+                { 5, 6, 7, 8 },
+                { 9, 1, 2, 3 },
+                { 7, 6, 5, 4 },
+            };
+            
+            _grid.InitGrid(arr);
+            Assert.IsFalse(_grid.IsPossibleToMakeMoves());
+        }
+        
+        [Test]
+        public void GRID_IS_ABLE_TO_MAKE_MOVE_ON_POSSIBLE_BOARD()
+        {
+            var arr = new int[,]
+            {
+                { 2, 2, 3, 4 },
+                { 5, 6, 7, 8 },
+                { 9, 1, 2, 3 },
+                { 7, 6, 5, 4 },
+            };
+            
+            _grid.InitGrid(arr);
+            Assert.IsTrue(_grid.IsPossibleToMakeMoves());
+        }
     }
 }

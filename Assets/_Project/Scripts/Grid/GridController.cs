@@ -193,6 +193,37 @@ namespace _Project.Scripts.Grid
                 new Vector2Int(1, 1),
                 new Vector2Int(1, 0));
         }
+
+        public bool IsPossibleToMakeMoves()
+        {
+            for (int i = 0; i < _sizeX; i++)
+            {
+                for (int j = 0; j < _sizeY; j++)
+                {
+                    if (_grid[i, j] == 0)
+                        return true;
+                }
+            }
+            for (int i = 0; i < _sizeX - 1; i++)
+            {
+                for (int j = 0; j < _sizeY; j++)
+                {
+                    if (_grid[i, j] == _grid[i + 1, j])
+                        return true;
+                }
+            }
+            
+            for (int i = 0; i < _sizeX; i++)
+            {
+                for (int j = 0; j < _sizeY - 1; j++)
+                {
+                    if (_grid[i, j] == _grid[i, j + 1])
+                        return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     public class GridChange
