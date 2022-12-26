@@ -12,7 +12,7 @@ namespace _Project.Scripts.View
         [Get] private SpriteRenderer _sprite;
         [Get] private Transform _tr;
         
-        private float _speed = 10f;
+        private float _speed = 15f;
 
         public async Task MoveAnimation(CancellationToken token, Vector3 start, Vector3 finish)
         {

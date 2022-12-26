@@ -146,6 +146,13 @@ namespace _Project.Scripts.Grid
                         
                         list.Add(new GridChange(new Vector2Int(i - step.x, j - step.y),
                             new Vector2Int(i - step.x, j - step.y), GridChangeType.Create, _grid[i - step.x, j - step.y]));
+
+                        //move moving piece to go to merge cell
+                        var obj = list.Find(_ => _.MovedTo.x == i && _.MovedTo.y == j && _.Type == GridChangeType.Move);
+                        if (obj != null)
+                        {
+                            obj.MovedTo = new Vector2Int(i - step.x, j - step.y);
+                        }
                     }
                 }
             }
