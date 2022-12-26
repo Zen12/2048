@@ -1,7 +1,4 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using _Project.Scripts.Grid;
 using _Project.Scripts.Pools;
@@ -36,13 +33,7 @@ namespace _Project.Scripts.View
             }
             _cellSize = cellSize;
         }
-
-        private async Task AnimateAndSetToPool(SpriteView view, Vector3 startPos, Vector3 finishPos)
-        {
-            await view.MoveAnimation(_onDestroyToken.Token, startPos, finishPos);
-            if (_onDestroyToken.IsCancellationRequested == false)
-                _pool.SetInPool(view);
-        }
+        
         
         public async Task TransitionToGridAnimation(int[,] finish, List<GridChange> changes)
         {
@@ -51,6 +42,7 @@ namespace _Project.Scripts.View
 
             var tasks = new List<Task>();
 
+            var removeLater = new List<SpriteView>();
             //move animation
             foreach (var change in changes)
             {
@@ -62,14 +54,19 @@ namespace _Project.Scripts.View
                     var view = holder.View;
                     if (view != null)
                     {
-                        tasks.Add(AnimateAndSetToPool(view, startPos, finishPos));
+                        removeLater.Add(view);
+                        tasks.Add(view.MoveAnimation(_onDestroyToken.Token, startPos, finishPos));
                     }
                     holder.Clear();
                 }
             }
             
             await Task.WhenAll(tasks);
-            await Task.Delay(TimeSpan.FromSeconds(0.2f));
+
+            foreach (var view in removeLater)
+            {
+                _pool.SetInPool(view);
+            }
             
             //finish grid, ignore animation results
             for (int i = 0; i < _sizeX; i++)
