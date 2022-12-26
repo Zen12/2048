@@ -61,23 +61,14 @@ namespace _Project.Scripts.Grid
                 default:
                     throw new ArgumentOutOfRangeException(nameof(state), state, null);
             }
-
-            _grid.AddPieceToRandomPlace();//
             
-            await ApplyGridChanges(start, _grid.GetRawGrid(), changes);
-        }
-
-        private async Task ApplyGridChanges(int[,] start, int[,] end, List<GridChange> changes)
-        {
             if (changes.Count == 0)
                 return;
 
-            await _boardAnimation.TransitionToGridAnimation(start, end, changes);
+            changes.Add(_grid.AddPieceToRandomPlace());
+            await _boardAnimation.TransitionToGridAnimation(start, _grid.GetRawGrid(), changes);
+
         }
-
-        
-        
-
 
     }
 }

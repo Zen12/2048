@@ -12,11 +12,10 @@ namespace _Project.Scripts.View
         [Get] private SpriteRenderer _sprite;
         [Get] private Transform _tr;
         
-        private float _speed = 12f;
+        private float _speed = 0.1f;
 
         public async Task MoveAnimation(CancellationToken token, Vector3 start, Vector3 finish)
         {
-            gameObject.SetActive(true);
             var delta = 1f / Vector3.Distance(start, finish) * _speed;
             var time = 0f;
             while (time <= 1f && token.IsCancellationRequested == false)

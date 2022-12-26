@@ -35,12 +35,8 @@ namespace _Project.Scripts.Grid
         public GridChange AddPieceAt(int x, int y, int value)
         {
             _grid[x, y] = value;
-            return new GridChange
-            {
-                MovedTo = new Vector2Int(x, y),
-                IsCreated = true,
-                Value = value
-            };
+            return new GridChange(new Vector2Int(x, y), new Vector2Int(x, y),
+                GridChangeType.Create, value);
         }
 
         public GridChange AddPieceToRandomPlace()
@@ -55,12 +51,8 @@ namespace _Project.Scripts.Grid
                 if (_grid[rX, rY] == 0)
                 {
                     _grid[rX, rY] = 2;
-                    return new GridChange
-                    {
-                        MovedTo = new Vector2Int(rX, rY),
-                        IsCreated = true,
-                        Value = 2
-                    };
+                    return new GridChange(new Vector2Int(rX, rY), new Vector2Int(rX, rY),
+                        GridChangeType.Create, 2);
                 }
             }
         }
@@ -108,14 +100,14 @@ namespace _Project.Scripts.Grid
                                 .Find(
                                     _ => _.MovedTo.x == i && 
                                           _.MovedTo.y == j &&
-                                          _.IsDestroy == false);
+                                          _.Type != GridChangeType.Destroy);
                             
                             if (obj == null)
                             {
-                                obj = new GridChange
-                                {
-                                    MovedFrom = new Vector2Int(i , j)
-                                };
+                                obj = new GridChange(
+                                    new Vector2Int(i, j),
+                                    new Vector2Int(i, j), 
+                                    GridChangeType.Move, _grid[i, j]);
                                 list.Add(obj);
                             }
 
@@ -145,25 +137,15 @@ namespace _Project.Scripts.Grid
                     {
                         _grid[i, j] = 0;
                         _grid[i - step.x, j - step.y] *= 2;
+
+                        list.Add(new GridChange(new Vector2Int(i - step.x, j - step.y),
+                            new Vector2Int(i - step.x, j - step.y), GridChangeType.Destroy, 0));
+
+                        list.Add(new GridChange(new Vector2Int(i, j),
+                            new Vector2Int(i, j), GridChangeType.Destroy, 0));
                         
-                        list.Add(new GridChange
-                        {
-                            IsDestroy = true,
-                            MovedFrom = new Vector2Int(i - step.x , j - step.y)
-                        });
-                        
-                        list.Add(new GridChange
-                        {
-                            IsDestroy = true,
-                            MovedFrom = new Vector2Int(i , j)
-                        });
-                        
-                        list.Add(new GridChange
-                        {
-                            IsCreated = true,
-                            MovedTo = new Vector2Int(i - step.x, j - step.y),
-                            Value = _grid[i - step.x, j - step.y]
-                        });
+                        list.Add(new GridChange(new Vector2Int(i - step.x, j - step.y),
+                            new Vector2Int(i - step.x, j - step.y), GridChangeType.Create, _grid[i - step.x, j - step.y]));
                     }
                 }
             }
@@ -210,8 +192,20 @@ namespace _Project.Scripts.Grid
     {
         public Vector2Int MovedFrom;
         public Vector2Int MovedTo;
+        public GridChangeType Type;
         public int Value;
-        public bool IsCreated;
-        public bool IsDestroy;
+
+        public GridChange(Vector2Int movedFrom, Vector2Int movedTo, GridChangeType type, int value)
+        {
+            MovedFrom = movedFrom;
+            MovedTo = movedTo;
+            Type = type;
+            Value = value;
+        }
+    }
+
+    public enum GridChangeType
+    {
+        Create, Destroy, Move
     }
 }

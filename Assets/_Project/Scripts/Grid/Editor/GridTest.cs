@@ -19,7 +19,7 @@ namespace _Project.Scripts.Grid.Editor
         {
             _grid.InitGrid(3, 3);
             var p = _grid.AddPieceToRandomPlace();
-            Assert.IsTrue(p.IsCreated);
+            Assert.IsTrue(p.Type == GridChangeType.Create);
         }
         
         [Test]

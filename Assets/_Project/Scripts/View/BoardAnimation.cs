@@ -35,6 +35,13 @@ namespace _Project.Scripts.View
             }
             _cellSize = cellSize;
         }
+
+        private async Task AnimateAndSetToPool(SpriteView view, Vector3 startPos, Vector3 finishPos)
+        {
+            await view.MoveAnimation(_onDestroyToken.Token, startPos, finishPos);
+            if (_onDestroyToken.IsCancellationRequested == false)
+                _pool.SetInPool(view);
+        }
         
         public async Task TransitionToGridAnimation(int[,] start, int[,] finish, List<GridChange> changes)
         {
@@ -45,49 +52,58 @@ namespace _Project.Scripts.View
             Assert.AreEqual(finish.GetLength(1), _sizeY);
 
             var tasks = new List<Task>();
-            /*
             //start or reset
             for (int i = 0; i < _sizeX; i++)
             {
                 for (int j = 0; j < _sizeY; j++)
                 {
-                    var value = start[i, j];
-                    _array[i, j].UpdateView(value);
+                    var value = finish[i, j];
+                    var (_, view) = _array[i, j].UpdateView(value);
+                    if (view != null)
+                        view.transform.position = GridToWorld(i, j);
                 }
             }
 
-            //transition animation
+            //move animation
             foreach (var change in changes)
             {
-                if (change.IsCreated == false && change.IsDestroy == false)
+                if (change.Type == GridChangeType.Move)
                 {
-                    var obj = _array[change.MovedFrom.x, change.MovedFrom.y];
+                    var holder = _array[change.MovedFrom.x, change.MovedFrom.y];
                     var startPos = GridToWorld(change.MovedFrom);
                     var finishPos = GridToWorld(change.MovedTo);
-                    var view = obj.View;
-                    
-                    tasks.Add(view.MoveAnimation(_onDestroyToken.Token, startPos, finishPos));
-                    
-                    //_array[change.MovedFrom.x, change.MovedFrom.y].Clear();
-                    //_array[change.MovedTo.x, change.MovedTo.y].UpdateView(view);
+                    var view = holder.View;
+                    if (view != null)
+                    {
+                        tasks.Add(AnimateAndSetToPool(view, startPos, finishPos));
+                    }
+                    holder.Clear();
                 }
             }
-
-            await Task.WhenAll(tasks);
-            */
+            Debug.Log("Here!");
             
-            //finish, need to animate last appearance
+            await Task.WhenAll(tasks);
+            
+            //finish grid, ignore animation results
             for (int i = 0; i < _sizeX; i++)
             {
                 for (int j = 0; j < _sizeY; j++)
                 {
                     var value = finish[i, j];
-                    var view = _array[i, j].UpdateView(value);
-                    if (value > 0 && view.Item1)
-                    {
-                        _ = view.Item2.AppearAnimation(_onDestroyToken.Token, GridToWorld(i, j));
-                    }
+                    var (_, view) = _array[i, j].UpdateView(value);
+                    if (view != null)
+                        view.transform.position = GridToWorld(i, j);
                 }
+            }
+            //appear animation
+            foreach (var change in changes)
+            {
+                if (change.Type == GridChangeType.Create)
+                {
+                    var holder = _array[change.MovedTo.x, change.MovedTo.y];
+                    var (_, v) = holder.UpdateView(change.Value);
+                    _ = v.AppearAnimation(_onDestroyToken.Token, GridToWorld(change.MovedTo));
+                } 
             }
         }
         
@@ -113,6 +129,12 @@ namespace _Project.Scripts.View
         public GridHolder(SpriteViewPool pool)
         {
             _pool = pool;
+        }
+
+        public void Clear()
+        {
+            View = null;
+            Value = 0;
         }
         
         public (bool, SpriteView) UpdateView(int value)
