@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using _Project.Scripts.Grid;
 using _Project.Scripts.Pools;
 using MonoDI.Scripts.Core;
@@ -17,12 +18,6 @@ namespace _Project.Scripts.View
         private SpriteView[,] _array;
 
         private float _cellSize;
-        
-        public bool IsAnimating
-        {
-            get;
-            private set;
-        }
 
         public void InitBoard(int sizeX, int sizeY, float cellSize)
         {
@@ -72,13 +67,7 @@ namespace _Project.Scripts.View
             }
         }
 
-        public void Execute(ExecutionType executionType)
-        {
-            IsAnimating = true;
-            StartCoroutine(ExecuteRoutine(executionType));
-        }
-
-        private IEnumerator ExecuteRoutine(ExecutionType executionType)
+        public async Task Execute(ExecutionType executionType)
         {
             var create = executionType == ExecutionType.Create;
             var destroy = executionType == ExecutionType.Destroy;
@@ -141,9 +130,10 @@ namespace _Project.Scripts.View
                 }
             }
 
-            yield return new WaitWhile(() => exeList.Count > 0);
-            
-            IsAnimating = false;
+            while (exeList.Count > 0)
+            {
+                await Task.Yield();
+            }
         }
         
         public Vector3 GridToWorld(Vector2Int gridPos)
