@@ -21,63 +21,58 @@ namespace _Project.Scripts.Grid
         public override void OnSyncStart()
         {
             _grid.InitGrid(_gridSize.x, _gridSize.y);
-            _boardAnimation.InitBoard(_gridSize.x, _gridSize.y, _cellSize);
         }
 
         public override IEnumerator OnSyncLastCallRoutine()
         {
             yield return null;
-            _boardAnimation.ResetItems();
-            _boardAnimation.AddChange(_grid.AddPieceToRandomPlace());
-            _boardAnimation.AddChange(_grid.AddPieceToRandomPlace());
-            yield return _boardAnimation.Execute(BoardAnimation.ExecutionType.Create);
+            _boardAnimation.InitBoard(_gridSize.x, _gridSize.y, _cellSize);
+
+            var start = _grid.GetRawGrid();
+            var changes = new List<GridChange>();
+            changes.Add(_grid.AddPieceToRandomPlace());
+            changes.Add(_grid.AddPieceToRandomPlace());
+            var end = _grid.GetRawGrid();
+            yield return _boardAnimation.TransitionToGridAnimation(start, end, changes);
         }
 
         [Sub]
         private async void OnInputUpdate(InputSignal state)
         {
+            var start = _grid.GetRawGrid();
+            List<GridChange> changes = null;
 
             switch (state.State)
             {
                 case InputState.None:
-                    break;
+                    return;
                 case InputState.Down:
-                    await ApplyGridChanges(_grid.ComputeUp());
+                    changes = _grid.ComputeUp();
                     break;
                 case InputState.Up:
-                    await ApplyGridChanges(_grid.ComputeDown());
+                    changes = _grid.ComputeDown();
                     break;
                 case InputState.Left:
-                    await ApplyGridChanges(_grid.ComputeLeft());
+                    changes = _grid.ComputeLeft();
                     break;
                 case InputState.Right:
-                    await ApplyGridChanges(_grid.ComputeRight());
+                    changes = _grid.ComputeRight();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(state), state, null);
             }
+
+            _grid.AddPieceToRandomPlace();//
             
+            await ApplyGridChanges(start, _grid.GetRawGrid(), changes);
         }
 
-        private async Task ApplyGridChanges(List<GridChange> changes)
+        private async Task ApplyGridChanges(int[,] start, int[,] end, List<GridChange> changes)
         {
             if (changes.Count == 0)
                 return;
 
-            _boardAnimation.ResetItems();
-            
-            foreach (var change in changes)
-            {
-                _boardAnimation.AddChange(change);
-            }
-
-            await _boardAnimation.Execute(BoardAnimation.ExecutionType.Move);
-            await _boardAnimation.Execute(BoardAnimation.ExecutionType.Destroy);
-            _boardAnimation.AddChange(_grid.AddPieceToRandomPlace());
-            await _boardAnimation.Execute(BoardAnimation.ExecutionType.Create);
-            
-
-            _boardAnimation.ValidateBoardGrid(_grid.GetRawGrid());
+            await _boardAnimation.TransitionToGridAnimation(start, end, changes);
         }
 
         

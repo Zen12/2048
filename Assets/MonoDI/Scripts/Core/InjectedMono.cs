@@ -1,10 +1,12 @@
 ﻿using System.Collections;
+using System.Threading;
 using UnityEngine;
 
 namespace MonoDI.Scripts.Core
 {
     public abstract class InjectedMono : MonoBehaviour
     {
+        protected readonly CancellationTokenSource _onDestroyToken = new CancellationTokenSource();
         protected virtual void Awake()
         {
 #if UNITY_EDITOR
@@ -19,6 +21,7 @@ namespace MonoDI.Scripts.Core
 
         protected virtual void OnDestroy()
         {
+            _onDestroyToken.Cancel();
             if (MonoDI.Instance != null)
                 MonoDI.Instance.ClearObject(this);
         }

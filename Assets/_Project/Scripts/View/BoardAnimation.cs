@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using _Project.Scripts.Grid;
 using _Project.Scripts.Pools;
@@ -13,127 +14,86 @@ namespace _Project.Scripts.View
     {
         [In] private SpriteViewPool _pool;
 
-        private readonly List<GridChange> _items = new List<GridChange>();
-
-        private SpriteView[,] _array;
+        private GridHolder[,] _array;
 
         private float _cellSize;
+        private int _sizeX;
+        private int _sizeY;
 
         public void InitBoard(int sizeX, int sizeY, float cellSize)
         {
-            _array = new SpriteView[sizeX, sizeY];
+            _sizeX = sizeX;
+            _sizeY = sizeY;
+            
+            _array = new GridHolder[sizeX, sizeY];
+            for (int i = 0; i < sizeX; i++)
+            {
+                for (int j = 0; j < sizeY; j++)
+                {
+                    _array[i, j] = new GridHolder(_pool);
+                }
+            }
             _cellSize = cellSize;
         }
-
-        public void ResetItems()
+        
+        public async Task TransitionToGridAnimation(int[,] start, int[,] finish, List<GridChange> changes)
         {
-            _items.Clear();
+            Assert.AreEqual(start.GetLength(0), _sizeX);
+            Assert.AreEqual(start.GetLength(1), _sizeY);
+            
+            Assert.AreEqual(finish.GetLength(0), _sizeX);
+            Assert.AreEqual(finish.GetLength(1), _sizeY);
+
+            var tasks = new List<Task>();
+            /*
+            //start or reset
+            for (int i = 0; i < _sizeX; i++)
+            {
+                for (int j = 0; j < _sizeY; j++)
+                {
+                    var value = start[i, j];
+                    _array[i, j].UpdateView(value);
+                }
+            }
+
+            //transition animation
+            foreach (var change in changes)
+            {
+                if (change.IsCreated == false && change.IsDestroy == false)
+                {
+                    var obj = _array[change.MovedFrom.x, change.MovedFrom.y];
+                    var startPos = GridToWorld(change.MovedFrom);
+                    var finishPos = GridToWorld(change.MovedTo);
+                    var view = obj.View;
+                    
+                    tasks.Add(view.MoveAnimation(_onDestroyToken.Token, startPos, finishPos));
+                    
+                    //_array[change.MovedFrom.x, change.MovedFrom.y].Clear();
+                    //_array[change.MovedTo.x, change.MovedTo.y].UpdateView(view);
+                }
+            }
+
+            await Task.WhenAll(tasks);
+            */
+            
+            //finish, need to animate last appearance
+            for (int i = 0; i < _sizeX; i++)
+            {
+                for (int j = 0; j < _sizeY; j++)
+                {
+                    var value = finish[i, j];
+                    var view = _array[i, j].UpdateView(value);
+                    if (value > 0 && view.Item1)
+                    {
+                        _ = view.Item2.AppearAnimation(_onDestroyToken.Token, GridToWorld(i, j));
+                    }
+                }
+            }
         }
         
-        public void AddChange(GridChange change)
+        public Vector3 GridToWorld(int x, int y)
         {
-            _items.Add(change);
-        }
-
-        public void ValidateBoardGrid(int[,] grid)
-        {
-            Assert.AreEqual(grid.GetLength(0), _array.GetLength(0));
-            Assert.AreEqual(grid.GetLength(1), _array.GetLength(1));
-            for (int i = 0; i < grid.GetLength(0); i++)
-            {
-                for (int j = 0; j < grid.GetLength(1); j++)
-                {
-                    if (grid[i, j] == 0)
-                    {
-                        if (_array[i, j] != null)
-                        {
-                            Debug.LogError("Expected to be NULL");
-                        }
-                    }
-                    else
-                    {
-                        if (_array[i, j] == null)
-                        {
-                            Debug.LogError("Expected to NOT be NULL");
-                        }
-                        if (grid[i, j] != _array[i, j].Value)
-                        {
-                            Debug.LogError("Expected Same Value");
-                        }
-                    }
-                    
-                    
-                }
-            }
-        }
-
-        public async Task Execute(ExecutionType executionType)
-        {
-            var create = executionType == ExecutionType.Create;
-            var destroy = executionType == ExecutionType.Destroy;
-
-            var exeList = _items.FindAll(_ => _.IsCreated == create && _.IsDestroy == destroy);
-
-            foreach (var change in exeList)
-            {
-                var c = change;
-
-                if (change.IsCreated)
-                {
-                    var item = _array[change.MovedTo.x, change.MovedTo.y];
-                    if (item != null)
-                        throw new System.Exception("Expected to NOT exist");
-
-                    var o = _pool.GetFromPool(change.Value);
-                    
-                    _array[change.MovedTo.x, change.MovedTo.y] = o;
-                    o.name = $"{change.MovedTo.x} { change.MovedTo.y}";
-
-                    o.Animate(GridToWorld(change.MovedTo), SpriteView.AnimationType.Create,
-                        () =>
-                        {
-                            exeList.Remove(c);
-                        });
-                } else if (change.IsDestroy)
-                {
-                    var item = _array[change.MovedFrom.x, change.MovedFrom.y];
-                    if (item == null)
-                        throw new System.Exception("Expected to exist");
-                    
-                    _array[change.MovedFrom.x, change.MovedFrom.y] = null;
-                    item.name = $"----";
-
-
-                    item.Animate(GridToWorld(change.MovedFrom), SpriteView.AnimationType.Disappear,
-                        () =>
-                        {
-                            exeList.Remove(c);
-                        });
-                }
-                else //move 
-                {
-                    var item = _array[change.MovedFrom.x, change.MovedFrom.y];
-                    if (item == null)
-                        throw new System.Exception("Expected to exist");
-                    
-                    _array[change.MovedFrom.x, change.MovedFrom.y] = null;
-                    _array[change.MovedTo.x, change.MovedTo.y] = item;
-                    
-                    item.name = $"{change.MovedTo.x} {change.MovedTo.y}";
-
-                    
-                    item.Animate(GridToWorld(change.MovedTo), SpriteView.AnimationType.Move,
-                        () =>
-                        {
-                            exeList.Remove(c);
-                        });
-                }
-            }
-
-            while (exeList.Count > 0)
-            {
-                await Task.Yield();
-            }
+            return new Vector3(x * _cellSize, y * _cellSize);
         }
         
         public Vector3 GridToWorld(Vector2Int gridPos)
@@ -141,16 +101,45 @@ namespace _Project.Scripts.View
             return new Vector3(gridPos.x * _cellSize, gridPos.y * _cellSize);
         }
         
-        public enum ExecutionType
-        {
-            Create, Destroy, Move
-        }
     }
 
-    internal class AnimationItem
+    internal class GridHolder
     {
-        public SpriteView Item;
-        public GridChange Change;
-        public Vector3 WorldPos;
+        public SpriteView View;
+        public int Value;
+
+        private readonly SpriteViewPool _pool;
+
+        public GridHolder(SpriteViewPool pool)
+        {
+            _pool = pool;
+        }
+        
+        public (bool, SpriteView) UpdateView(int value)
+        {
+            var isUpdate = Value != value;
+
+            if (isUpdate == false)
+            {
+                return (false, View);
+            }
+            Value = value;
+
+            
+            if (View != null)
+            {
+                _pool.SetInPool(View);
+                View = null;
+            }
+
+            if (value > 0)
+            {
+                View = _pool.GetFromPool(value);
+            }
+
+            return (true, View);
+        }
+        
+        
     }
 }

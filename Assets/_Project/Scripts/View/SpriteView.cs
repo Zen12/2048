@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Threading;
+using System.Threading.Tasks;
 using MonoDI.Scripts.Core;
 using UnityEngine;
 
@@ -9,44 +11,58 @@ namespace _Project.Scripts.View
     {
         [Get] private SpriteRenderer _sprite;
         [Get] private Transform _tr;
-
-        private Vector3 _targetPos;
-        private Coroutine _lastRoutine;
-        private System.Action _onFinishMove;
         
-        public int Value
-        {
-            get;
-            set;
-        }
-        
-
         private float _speed = 12f;
 
-        public void Animate(Vector3 pos, AnimationType animationType,
-            System.Action onFinish = null)
+        public async Task MoveAnimation(CancellationToken token, Vector3 start, Vector3 finish)
         {
             gameObject.SetActive(true);
-            _onFinishMove = onFinish;
-            if (_lastRoutine != null)
-                StopCoroutine(_lastRoutine);
-
-            switch (animationType)
+            var delta = 1f / Vector3.Distance(start, finish) * _speed;
+            var time = 0f;
+            while (time <= 1f && token.IsCancellationRequested == false)
             {
-                case AnimationType.Move:
-                    _targetPos = pos;
-                    _lastRoutine = StartCoroutine(MoveToPosRoutine());
-                    break;
-                case AnimationType.Create:
-                    _targetPos = pos;
-                    _lastRoutine = StartCoroutine(CreateRoutine());
-                    break;
-                case AnimationType.Disappear:
-                    _lastRoutine = StartCoroutine(DisappearRoutine());
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(animationType), animationType, null);
+                time += delta * Time.deltaTime;
+                _tr.position = Vector3.Lerp(start, finish, time);
+                await Task.Yield();
             }
+        }
+
+        public async Task AppearAnimation(CancellationToken token, Vector3 pos)
+        {
+            _tr.position = pos;
+            var currentLerp = 0f;
+
+            var big = Vector3.one * 1.1f;
+            var small = Vector3.one * 0.9f;
+            var speed = 4f;
+
+            //grow
+            while (currentLerp <= 1f && token.IsCancellationRequested == false)
+            {
+                currentLerp += Time.deltaTime * speed * 4f;
+                _tr.localScale = Vector3.Lerp(Vector3.zero, big, currentLerp);
+                await Task.Yield();
+            }
+
+            currentLerp = 0f;
+            //small 
+            while (currentLerp <= 1f && token.IsCancellationRequested == false)
+            {
+                currentLerp += Time.deltaTime * speed;
+                _tr.localScale = Vector3.Lerp(big, small, currentLerp);
+                await Task.Yield();
+            }
+
+            currentLerp = 0f;
+
+            //normal 
+            while (currentLerp <= 1f && token.IsCancellationRequested == false)
+            {
+                currentLerp += Time.deltaTime * speed;
+                _tr.localScale = Vector3.Lerp(small, Vector3.one, currentLerp);
+                await Task.Yield();
+            }
+
         }
         public void UpdateSprite(Sprite sprite)
         {
@@ -55,7 +71,6 @@ namespace _Project.Scripts.View
         
         public void OnEnterPool()
         {
-            _tr.position = Vector3.left * 1000000f;
             gameObject.SetActive(false);
         }
 
@@ -63,104 +78,6 @@ namespace _Project.Scripts.View
         {
             gameObject.SetActive(true);
         }
-        
-        #region Animation
 
-        private IEnumerator DisappearRoutine()
-        {
-            var delta = Time.deltaTime * _speed;
-            var dir = _targetPos - _tr.position;
-
-            while(dir.magnitude > delta + float.Epsilon)
-            {
-                _tr.position += dir.normalized * delta;
-                yield return null;
-                delta = Time.deltaTime * _speed;
-                dir = _targetPos - _tr.position;
-            }
-            
-            _tr.position = _targetPos;
-            
-            var currentLerp = 0f;
-
-            //grow
-            while (currentLerp < 1f)
-            {
-                currentLerp += Time.deltaTime * 4f;
-                _tr.localScale = Vector3.Lerp(Vector3.zero, Vector3.zero, currentLerp);
-                yield return null;
-            }
-            
-            _lastRoutine = null;
-            _onFinishMove?.Invoke();
-            gameObject.SetActive(false);
-        }
-
-        private IEnumerator MoveToPosRoutine()
-        {
-            yield return null;
-            var delta = Time.deltaTime * _speed;
-            var dir = _targetPos - _tr.position;
-
-            while(dir.magnitude > delta + float.Epsilon)
-            {
-                _tr.position += dir.normalized * delta;
-                yield return null;
-                delta = Time.deltaTime * _speed;
-                dir = _targetPos - _tr.position;
-            }
-
-            _tr.position = _targetPos;
-            _lastRoutine = null;
-            _onFinishMove?.Invoke();
-        }
-        
-        private IEnumerator CreateRoutine()
-        {
-            _tr.position = _targetPos;
-            _tr.localScale = Vector3.zero;
-
-            var currentLerp = 0f;
-
-            var big = Vector3.one * 1.1f;
-            var small = Vector3.one * 0.9f;
-            var speed = 4f;
-
-            //grow
-            while (currentLerp < 1f)
-            {
-                currentLerp += Time.deltaTime * speed * 4f;
-                _tr.localScale = Vector3.Lerp(Vector3.zero, big, currentLerp);
-                yield return null;
-            }
-
-            currentLerp = 0f;
-            //small 
-            while (currentLerp < 1f)
-            {
-                currentLerp += Time.deltaTime * speed;
-                _tr.localScale = Vector3.Lerp(big, small, currentLerp);
-                yield return null;
-            }
-
-            currentLerp = 0f;
-
-            //normal 
-            while (currentLerp < 1f)
-            {
-                currentLerp += Time.deltaTime * speed;
-                _tr.localScale = Vector3.Lerp(small, Vector3.one, currentLerp);
-                yield return null;
-            }
-            
-            _onFinishMove?.Invoke();
-        }
-        
-        #endregion
-        
-        public enum AnimationType
-        {
-            Move, Create, Disappear
-        }
     }
 }
