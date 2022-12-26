@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
@@ -43,26 +44,12 @@ namespace _Project.Scripts.View
                 _pool.SetInPool(view);
         }
         
-        public async Task TransitionToGridAnimation(int[,] start, int[,] finish, List<GridChange> changes)
+        public async Task TransitionToGridAnimation(int[,] finish, List<GridChange> changes)
         {
-            Assert.AreEqual(start.GetLength(0), _sizeX);
-            Assert.AreEqual(start.GetLength(1), _sizeY);
-            
             Assert.AreEqual(finish.GetLength(0), _sizeX);
             Assert.AreEqual(finish.GetLength(1), _sizeY);
 
             var tasks = new List<Task>();
-            //start or reset
-            for (int i = 0; i < _sizeX; i++)
-            {
-                for (int j = 0; j < _sizeY; j++)
-                {
-                    var value = finish[i, j];
-                    var (_, view) = _array[i, j].UpdateView(value);
-                    if (view != null)
-                        view.transform.position = GridToWorld(i, j);
-                }
-            }
 
             //move animation
             foreach (var change in changes)
@@ -80,9 +67,9 @@ namespace _Project.Scripts.View
                     holder.Clear();
                 }
             }
-            Debug.Log("Here!");
             
             await Task.WhenAll(tasks);
+            await Task.Delay(TimeSpan.FromSeconds(0.2f));
             
             //finish grid, ignore animation results
             for (int i = 0; i < _sizeX; i++)

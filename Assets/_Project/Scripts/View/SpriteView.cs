@@ -12,7 +12,7 @@ namespace _Project.Scripts.View
         [Get] private SpriteRenderer _sprite;
         [Get] private Transform _tr;
         
-        private float _speed = 0.1f;
+        private float _speed = 10f;
 
         public async Task MoveAnimation(CancellationToken token, Vector3 start, Vector3 finish)
         {
@@ -65,7 +65,8 @@ namespace _Project.Scripts.View
         }
         public void UpdateSprite(Sprite sprite)
         {
-            _sprite.sprite = sprite;
+            if (_sprite != null)
+                _sprite.sprite = sprite;
         }
         
         public void OnEnterPool()
